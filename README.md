@@ -1,4 +1,5 @@
-# Task Tracker Application
+# Task Tracker Conflict Branch
+
 
 Full-stack task tracker for laboratory work on Git workflow, Pull Requests, Code Review and merge conflict resolution.
 
