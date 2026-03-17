@@ -1,4 +1,4 @@
-# Task Tracker
+# Task Tracker MVP
 
 Full-stack task tracker for laboratory work on Git workflow, Pull Requests, Code Review and merge conflict resolution.
 
