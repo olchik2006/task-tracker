@@ -1,0 +1,23 @@
+{
+  "name": "task-tracker",
+  "version": "1.0.0",
+  "description": "Full-stack task tracker for laboratory work on Git workflow, Pull Requests, Code Review and merge conflict resolution.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olchik2006/task-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/olchik2006/task-tracker/issues"
+  },
+  "homepage": "https://github.com/olchik2006/task-tracker#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0"
+  }
+}
