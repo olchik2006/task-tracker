@@ -4,8 +4,10 @@ import { TaskList } from './components/TaskList.js'
 import { FilterBar } from './components/FilterBar.js'
 import { TaskStats } from './components/TaskStats.js'
 
+
 let currentFilter = 'all'
 let tasks = []
+
 
 function getFilteredTasks() {
   if (currentFilter === 'active') {
@@ -19,9 +21,11 @@ function getFilteredTasks() {
   return tasks
 }
 
+
 async function loadTasks() {
   tasks = await getTasks()
 }
+
 
 export async function renderApp() {
   const app = document.getElementById('app')
@@ -30,18 +34,20 @@ export async function renderApp() {
     await loadTasks()
 
     app.innerHTML = `
-      <div class="container">
-        <div class="header">
-          <span class="badge">Task Manager</span>
-          <h1>Task Tracker</h1>
-          <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
-        </div>
+      <main>
+        <div class="container">
+          <div class="header">
+            <span class="badge">Task Manager</span>
+            <h1>Task Tracker</h1>
+            <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
+          </div>
 
-        ${TaskStats(tasks)}
-        ${TaskForm()}
-        ${FilterBar(currentFilter)}
-        ${TaskList(getFilteredTasks())}
-      </div>
+          ${TaskStats(tasks)}
+          ${TaskForm()}
+          ${FilterBar(currentFilter)}
+          ${TaskList(getFilteredTasks())}
+        </div>
+      </main>
     `
 
     const form = document.getElementById('task-form')
@@ -81,10 +87,12 @@ export async function renderApp() {
     console.error(error)
 
     app.innerHTML = `
-      <div class="container">
-        <h1>Task Tracker</h1>
-        <p class="subtitle">Сталася помилка при завантаженні застосунку</p>
-      </div>
+      <main>
+        <div class="container">
+          <h1>Task Tracker</h1>
+          <p class="subtitle">Сталася помилка при завантаженні застосунку</p>
+        </div>
+      </main>
     `
   }
 }
