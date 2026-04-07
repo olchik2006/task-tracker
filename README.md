@@ -1,6 +1,8 @@
 # Task Tracker MVP Application
 
-[![CI/CD Pipeline](https://github.com/olchik2006/task-tracker/actions/workflows/ci-cd.yml/badge.svg)]
+![CI/CD Pipeline](https://github.com/olchik2006/task-tracker/actions/workflows/ci-cd.yml/badge.svg)
+
+**Веб-сайт:** https://task-tracker-119s.vercel.app/
 Full-stack task tracker for laboratory work on Git workflow, Pull Requests, Code Review and merge conflict resolution.
 
 ## MVP
