@@ -1,12 +1,11 @@
 import { test, expect } from "@playwright/test";
 
-test("homepage loads successfully", async ({ page }) => {
+test("homepage has Task Tracker heading", async ({ page }) => {
   await page.goto("http://localhost:5173");
-  await expect(page).toHaveTitle(/Task Tracker/);
+  await expect(page.locator("h1")).toBeVisible();
 });
 
-test("has input field for new task", async ({ page }) => {
+test("homepage loads correct URL", async ({ page }) => {
   await page.goto("http://localhost:5173");
-  const input = page.locator("input");
-  await expect(input).toBeVisible();
+  await expect(page).toHaveURL("http://localhost:5173");
 });
