@@ -8,4 +8,7 @@ describe("App", () => {
   it("should work with strings", () => {
     expect("task tracker").toContain("task");
   });
+  test("broken test", () => {
+    expect(1).toBe(2);
+  });
 });
