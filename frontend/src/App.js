@@ -3,6 +3,7 @@ import { TaskForm } from "./components/TaskForm.js";
 import { TaskList } from "./components/TaskList.js";
 import { FilterBar } from "./components/FilterBar.js";
 import { TaskStats } from "./components/TaskStats.js";
+import posthog from "posthog-js";
 
 let currentFilter = "all";
 let tasks = [];
@@ -30,14 +31,14 @@ export async function renderApp() {
     await loadTasks();
 
     app.innerHTML = `
-  <main>
-    <div class="container">
-      <div class="header">
-        <span class="badge">Task Manager</span>
-        <span class="env-badge">Mode: ${import.meta.env.VITE_APP_STATUS || "Development"}</span>
-        <h1>Task Tracker</h1>
-        <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
-      </div>
+      <main>
+        <div class="container">
+          <div class="header">
+            <span class="badge">Task Manager</span>
+            <span class="env-badge">Mode: ${import.meta.env.VITE_APP_STATUS || "Development"}</span>
+            <h1>Task Tracker</h1>
+            <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
+          </div>
 
           ${TaskStats(tasks)}
           ${TaskForm()}
@@ -57,19 +58,46 @@ export async function renderApp() {
       if (!title) return;
 
       await createTask(title);
+
+      posthog.capture("task_created", {
+        title_length: title.length,
+        is_authenticated: false,
+        category: "general",
+        priority: "normal",
+      });
+
       await renderApp();
     });
 
     document.querySelectorAll(".toggle-btn").forEach((button) => {
       button.addEventListener("click", async () => {
-        await toggleTask(Number(button.dataset.id));
+        const id = Number(button.dataset.id);
+        const taskBeforeToggle = tasks.find((task) => task.id === id);
+
+        await toggleTask(id);
+
+        if (taskBeforeToggle && !taskBeforeToggle.done) {
+          posthog.capture("task_completed", {
+            task_id: id,
+            title_length: taskBeforeToggle.title?.length || 0,
+          });
+        }
+
         await renderApp();
       });
     });
 
     document.querySelectorAll(".delete-btn").forEach((button) => {
       button.addEventListener("click", async () => {
-        await deleteTask(Number(button.dataset.id));
+        const id = Number(button.dataset.id);
+
+        await deleteTask(id);
+
+        posthog.capture("task_deleted", {
+          task_id: id,
+          reason: "manual_delete",
+        });
+
         await renderApp();
       });
     });

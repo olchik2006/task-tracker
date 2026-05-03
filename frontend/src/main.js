@@ -1,4 +1,12 @@
-import './styles/main.css'
-import { renderApp } from './App.js'
+import "./styles/main.css";
+import { renderApp } from "./App.js";
+import posthog from "posthog-js";
 
-renderApp()
+posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
+  api_host: import.meta.env.VITE_POSTHOG_HOST,
+  person_profiles: "identified_only",
+  capture_pageview: true,
+  autocapture: true,
+});
+
+renderApp();
