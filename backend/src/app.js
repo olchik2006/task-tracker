@@ -6,7 +6,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://task-tracker-rjpg.onrender.com"],
+    origin: [
+      "http://localhost:5173",
+      "https://task-tracker-rjpg.onrender.com",
+      "https://task-tracker-119s.vercel.app",
+    ],
   }),
 );
 app.use(express.json());
