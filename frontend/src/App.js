@@ -6,7 +6,7 @@ import { TaskStats } from "./components/TaskStats.js";
 import posthog from "posthog-js";
 
 posthog.init("phc_p7uvLQeEbizaSEBtdi4KB2vqYDS4vHm4sde3fLfMLw9x", {
-  api_host: "http://localhost:5000/proxy/posthog",
+  api_host: "https://task-tracker-rjpg.onrender.com/proxy/posthog",
 });
 
 let currentFilter = "all";
