@@ -7,8 +7,9 @@ import posthog from "posthog-js";
 
 let currentFilter = "all";
 let tasks = [];
-let showUrgentFilter = false;
+let showUrgentFeature = false;
 let flagRefreshTimer = null;
+let featureFlagsSubscribed = false;
 
 function getFilteredTasks() {
   if (currentFilter === "active") {
@@ -36,26 +37,44 @@ async function loadTasks() {
 }
 
 function syncFeatureFlags() {
-  const nextValue = !!posthog.isFeatureEnabled("show-urgent-filter");
-  const changed = nextValue !== showUrgentFilter;
-  showUrgentFilter = nextValue;
+  const nextValue = !!posthog.isFeatureEnabled("show-urgent-filter", {
+    send_event: false,
+  });
+
+  const changed = nextValue !== showUrgentFeature;
+  showUrgentFeature = nextValue;
+
+  if (!showUrgentFeature && currentFilter === "urgent") {
+    currentFilter = "all";
+  }
+
   return changed;
 }
 
 function startFlagPolling() {
-  if (flagRefreshTimer) clearInterval(flagRefreshTimer);
+  if (flagRefreshTimer) {
+    clearInterval(flagRefreshTimer);
+  }
 
   flagRefreshTimer = setInterval(async () => {
     try {
       await posthog.reloadFeatureFlags();
-      const changed = syncFeatureFlags();
-      if (changed) {
-        await renderApp();
-      }
     } catch (error) {
       console.error("Failed to reload feature flags:", error);
     }
-  }, 15000);
+  }, 10000);
+}
+
+function setupFeatureFlagListener() {
+  if (featureFlagsSubscribed) return;
+  featureFlagsSubscribed = true;
+
+  posthog.onFeatureFlags(() => {
+    const changed = syncFeatureFlags();
+    if (changed) {
+      renderApp();
+    }
+  });
 }
 
 export async function renderApp() {
@@ -70,13 +89,14 @@ export async function renderApp() {
           <h1>Task Tracker</h1>
           <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
         </div>
-        <div class="loading-state">Loading...</div>
+        <p class="empty">Loading...</p>
       </div>
     </main>
   `;
 
   try {
     await loadTasks();
+    setupFeatureFlagListener();
     await posthog.reloadFeatureFlags();
     syncFeatureFlags();
     startFlagPolling();
@@ -92,8 +112,8 @@ export async function renderApp() {
           </div>
 
           ${TaskStats(tasks)}
-          ${TaskForm(showUrgentFilter)}
-          ${FilterBar(currentFilter, showUrgentFilter)}
+          ${TaskForm(showUrgentFeature)}
+          ${FilterBar(currentFilter, showUrgentFeature)}
           ${TaskList(getFilteredTasks())}
         </div>
       </main>
@@ -110,7 +130,8 @@ export async function renderApp() {
         const title = input.value.trim();
         if (!title) return;
 
-        const urgent = urgentInput ? urgentInput.checked : false;
+        const urgent =
+          showUrgentFeature && urgentInput ? urgentInput.checked : false;
 
         await createTask(title, urgent);
 
@@ -137,6 +158,7 @@ export async function renderApp() {
           posthog.capture("task_completed", {
             task_id: id,
             title_length: taskBeforeToggle.title?.length || 0,
+            urgent: !!taskBeforeToggle.urgent,
           });
         }
 
@@ -147,12 +169,14 @@ export async function renderApp() {
     document.querySelectorAll(".delete-btn").forEach((button) => {
       button.addEventListener("click", async () => {
         const id = Number(button.dataset.id);
+        const taskToDelete = tasks.find((task) => task.id === id);
 
         await deleteTask(id);
 
         posthog.capture("task_deleted", {
           task_id: id,
           reason: "manual_delete",
+          urgent: !!taskToDelete?.urgent,
         });
 
         await renderApp();
