@@ -9,11 +9,6 @@ let currentFilter = "all";
 let tasks = [];
 let showUrgentFilter = false;
 
-posthog.onFeatureFlags(() => {
-  showUrgentFilter = !!posthog.isFeatureEnabled("show-urgent-filter");
-  renderApp();
-});
-
 function getFilteredTasks() {
   if (currentFilter === "active") {
     return tasks.filter((task) => !task.done);
@@ -31,7 +26,12 @@ function getFilteredTasks() {
 }
 
 async function loadTasks() {
-  tasks = await getTasks();
+  try {
+    tasks = await getTasks();
+  } catch (error) {
+    console.error("Failed to load tasks:", error);
+    tasks = [];
+  }
 }
 
 export async function renderApp() {
@@ -50,6 +50,7 @@ export async function renderApp() {
 
   try {
     await loadTasks();
+
     showUrgentFilter = !!posthog.isFeatureEnabled("show-urgent-filter");
 
     app.innerHTML = `
@@ -73,23 +74,25 @@ export async function renderApp() {
     const form = document.getElementById("task-form");
     const input = document.getElementById("task-input");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    if (form && input) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-      const title = input.value.trim();
-      if (!title) return;
+        const title = input.value.trim();
+        if (!title) return;
 
-      await createTask(title);
+        await createTask(title);
 
-      posthog.capture("task_created", {
-        title_length: title.length,
-        is_authenticated: false,
-        category: "general",
-        priority: title.toLowerCase().includes("urgent") ? "high" : "normal",
+        posthog.capture("task_created", {
+          title_length: title.length,
+          is_authenticated: false,
+          category: "general",
+          priority: title.toLowerCase().includes("urgent") ? "high" : "normal",
+        });
+
+        await renderApp();
       });
-
-      await renderApp();
-    });
+    }
 
     document.querySelectorAll(".toggle-btn").forEach((button) => {
       button.addEventListener("click", async () => {
@@ -136,8 +139,10 @@ export async function renderApp() {
     app.innerHTML = `
       <main>
         <div class="container">
-          <h1>Task Tracker</h1>
-          <p class="subtitle">Сталася помилка при завантаженні застосунку</p>
+          <div class="header">
+            <h1>Task Tracker</h1>
+            <p class="subtitle">Сталася помилка при завантаженні застосунку</p>
+          </div>
         </div>
       </main>
     `;
