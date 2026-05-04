@@ -1,61 +1,34 @@
-const API_URL = "http://localhost:3000/tasks";
+const API_URL = import.meta.env.VITE_API_URL;
 
-export async function getTasks() {
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error("Failed to fetch tasks");
-  }
-  return response.json();
+if (!API_URL) {
+  throw new Error("VITE_API_URL is not set");
 }
 
-export async function createTask(title, urgent = false) {
-  const response = await fetch(API_URL, {
+export async function getTasks() {
+  const response = await fetch(`${API_URL}/api/tasks`);
+  return await response.json();
+}
+
+export async function createTask(title) {
+  const response = await fetch(`${API_URL}/api/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      title,
-      done: false,
-      urgent,
-    }),
+    body: JSON.stringify({ title }),
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to create task");
-  }
-
-  return response.json();
+  return await response.json();
 }
 
 export async function toggleTask(id) {
-  const tasks = await getTasks();
-  const task = tasks.find((item) => item.id === id);
-
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      ...task,
-      done: !task.done,
-    }),
+  const response = await fetch(`${API_URL}/api/tasks/${id}/toggle`, {
+    method: "PATCH",
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to toggle task");
-  }
-
-  return response.json();
+  return await response.json();
 }
 
 export async function deleteTask(id) {
-  const response = await fetch(`${API_URL}/${id}`, {
+  await fetch(`${API_URL}/api/tasks/${id}`, {
     method: "DELETE",
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to delete task");
-  }
 }

@@ -21,16 +21,8 @@ body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(124, 58, 237, 0.25),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at top right,
-      rgba(56, 189, 248, 0.2),
-      transparent 30%
-    ),
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.25), transparent 30%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.2), transparent 30%),
     linear-gradient(180deg, #0b1020 0%, #0f172a 100%);
   color: var(--text);
   min-height: 100vh;
@@ -108,9 +100,7 @@ h1 {
   color: white;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .task-form button:hover {
@@ -270,47 +260,4 @@ h1 {
   .task-stats {
     grid-template-columns: 1fr;
   }
-}
-.urgent-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(124, 58, 237, 0.12);
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  color: #e9d5ff;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.urgent-toggle input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: #a855f7;
-  cursor: pointer;
-}
-
-.task-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.task-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.urgent-badge {
-  background: rgba(239, 68, 68, 0.14);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.24);
 }
