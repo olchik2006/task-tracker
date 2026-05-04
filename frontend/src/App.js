@@ -7,8 +7,8 @@ import posthog from "posthog-js";
 
 let currentFilter = "all";
 let tasks = [];
-let showUrgentFilter = false;
-let flagRefreshTimer = null;
+let showProductivityTip = false;
+let featureFlagsSubscribed = false;
 
 function getFilteredTasks() {
   if (currentFilter === "active") {
@@ -17,10 +17,6 @@ function getFilteredTasks() {
 
   if (currentFilter === "done") {
     return tasks.filter((task) => task.done);
-  }
-
-  if (currentFilter === "urgent") {
-    return tasks.filter((task) => task.urgent);
   }
 
   return tasks;
@@ -36,26 +32,36 @@ async function loadTasks() {
 }
 
 function syncFeatureFlags() {
-  const nextValue = !!posthog.isFeatureEnabled("show-urgent-filter");
-  const changed = nextValue !== showUrgentFilter;
-  showUrgentFilter = nextValue;
+  const nextValue = !!posthog.isFeatureEnabled("show-productivity-tip");
+  const changed = nextValue !== showProductivityTip;
+  showProductivityTip = nextValue;
   return changed;
 }
 
-function startFlagPolling() {
-  if (flagRefreshTimer) clearInterval(flagRefreshTimer);
+function setupFeatureFlagListener() {
+  if (featureFlagsSubscribed) return;
+  featureFlagsSubscribed = true;
 
-  flagRefreshTimer = setInterval(async () => {
-    try {
-      await posthog.reloadFeatureFlags();
-      const changed = syncFeatureFlags();
-      if (changed) {
-        await renderApp();
-      }
-    } catch (error) {
-      console.error("Failed to reload feature flags:", error);
+  posthog.onFeatureFlags(() => {
+    const changed = syncFeatureFlags();
+    if (changed) {
+      renderApp();
     }
-  }, 15000);
+  });
+}
+
+function ProductivityTip() {
+  return `
+    <section class="tip-card">
+      <div class="tip-icon">✨</div>
+      <div class="tip-content">
+        <h3 class="tip-title">Порада продуктивності</h3>
+        <p class="tip-text">
+          Використовуй фільтри та регулярно відмічай виконані задачі, щоб краще відстежувати свій прогрес.
+        </p>
+      </div>
+    </section>
+  `;
 }
 
 export async function renderApp() {
@@ -70,16 +76,16 @@ export async function renderApp() {
           <h1>Task Tracker</h1>
           <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
         </div>
-        <div class="loading-state">Loading...</div>
+        <p class="empty">Loading...</p>
       </div>
     </main>
   `;
 
   try {
     await loadTasks();
+    setupFeatureFlagListener();
     await posthog.reloadFeatureFlags();
     syncFeatureFlags();
-    startFlagPolling();
 
     app.innerHTML = `
       <main>
@@ -92,8 +98,9 @@ export async function renderApp() {
           </div>
 
           ${TaskStats(tasks)}
-          ${TaskForm(showUrgentFilter)}
-          ${FilterBar(currentFilter, showUrgentFilter)}
+          ${showProductivityTip ? ProductivityTip() : ""}
+          ${TaskForm()}
+          ${FilterBar(currentFilter)}
           ${TaskList(getFilteredTasks())}
         </div>
       </main>
@@ -101,7 +108,6 @@ export async function renderApp() {
 
     const form = document.getElementById("task-form");
     const input = document.getElementById("task-input");
-    const urgentInput = document.getElementById("task-urgent");
 
     if (form && input) {
       form.addEventListener("submit", async (e) => {
@@ -110,16 +116,12 @@ export async function renderApp() {
         const title = input.value.trim();
         if (!title) return;
 
-        const urgent = urgentInput ? urgentInput.checked : false;
-
-        await createTask(title, urgent);
+        await createTask(title);
 
         posthog.capture("task_created", {
           title_length: title.length,
           is_authenticated: false,
           category: "general",
-          priority: urgent ? "high" : "normal",
-          urgent,
         });
 
         await renderApp();

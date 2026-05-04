@@ -21,8 +21,16 @@ body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(124, 58, 237, 0.25), transparent 30%),
-    radial-gradient(circle at top right, rgba(56, 189, 248, 0.2), transparent 30%),
+    radial-gradient(
+      circle at top left,
+      rgba(124, 58, 237, 0.25),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(56, 189, 248, 0.2),
+      transparent 30%
+    ),
     linear-gradient(180deg, #0b1020 0%, #0f172a 100%);
   color: var(--text);
   min-height: 100vh;
@@ -100,7 +108,9 @@ h1 {
   color: white;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .task-form button:hover {
@@ -260,4 +270,37 @@ h1 {
   .task-stats {
     grid-template-columns: 1fr;
   }
+}
+.tip-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+
+.tip-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.tip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tip-title {
+  margin: 0;
+  font-size: 16px;
+  color: #f5d0fe;
+}
+
+.tip-text {
+  margin: 0;
+  font-size: 14px;
+  color: #cbd5e1;
 }
