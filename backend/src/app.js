@@ -25,7 +25,7 @@ app.use(
   }),
 );
 
-app.use(express.json());
+app.use("/proxy/posthog", express.raw({ type: "*/*" }));
 
 app.all("/proxy/posthog/*", async (req, res) => {
   try {
@@ -33,21 +33,33 @@ app.all("/proxy/posthog/*", async (req, res) => {
     const response = await fetch(`https://us.i.posthog.com${targetPath}`, {
       method: req.method,
       headers: {
-        "Content-Type": req.headers["content-type"] || "application/json",
+        "Content-Type":
+          req.headers["content-type"] || "application/octet-stream",
         Host: "us.i.posthog.com",
       },
-      body: ["GET", "HEAD"].includes(req.method)
-        ? undefined
-        : JSON.stringify(req.body),
+      body: ["GET", "HEAD"].includes(req.method) ? undefined : req.body,
     });
 
-    const text = await response.text();
-    res.status(response.status).send(text);
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    res.status(response.status);
+    response.headers.forEach((value, key) => {
+      if (
+        key.toLowerCase() !== "content-encoding" &&
+        key.toLowerCase() !== "transfer-encoding"
+      ) {
+        res.setHeader(key, value);
+      }
+    });
+
+    res.send(buffer);
   } catch (error) {
     console.error("Proxy error:", error);
     res.status(500).json({ error: "Failed to proxy to PostHog" });
   }
 });
+
+app.use(express.json());
 
 app.get("/api/health", (req, res) => {
   res.json({
