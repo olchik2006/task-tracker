@@ -27,6 +27,25 @@ app.use(
 
 app.use(express.json());
 
+app.post("/proxy/posthog", async (req, res) => {
+  try {
+    const response = await fetch("https://us.i.posthog.com/i/v0/e/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Host: "us.i.posthog.com",
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const text = await response.text();
+    res.status(response.status).send(text);
+  } catch (error) {
+    console.error("Proxy error:", error);
+    res.status(500).json({ error: "Failed to proxy to PostHog" });
+  }
+});
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
