@@ -7,6 +7,12 @@ import posthog from "posthog-js";
 
 let currentFilter = "all";
 let tasks = [];
+let showUrgentFilter = false;
+
+posthog.onFeatureFlags(() => {
+  showUrgentFilter = !!posthog.isFeatureEnabled("show-urgent-filter");
+  renderApp();
+});
 
 function getFilteredTasks() {
   if (currentFilter === "active") {
@@ -15,6 +21,10 @@ function getFilteredTasks() {
 
   if (currentFilter === "done") {
     return tasks.filter((task) => task.done);
+  }
+
+  if (currentFilter === "urgent") {
+    return tasks.filter((task) => task.title?.toLowerCase().includes("urgent"));
   }
 
   return tasks;
@@ -42,7 +52,7 @@ export async function renderApp() {
 
           ${TaskStats(tasks)}
           ${TaskForm()}
-          ${FilterBar(currentFilter)}
+          ${FilterBar(currentFilter, showUrgentFilter)}
           ${TaskList(getFilteredTasks())}
         </div>
       </main>
@@ -63,7 +73,7 @@ export async function renderApp() {
         title_length: title.length,
         is_authenticated: false,
         category: "general",
-        priority: "normal",
+        priority: title.toLowerCase().includes("urgent") ? "high" : "normal",
       });
 
       await renderApp();
