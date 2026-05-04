@@ -27,15 +27,18 @@ app.use(
 
 app.use(express.json());
 
-app.post("/proxy/posthog", async (req, res) => {
+app.all("/proxy/posthog/*", async (req, res) => {
   try {
-    const response = await fetch("https://us.i.posthog.com/i/v0/e/", {
-      method: "POST",
+    const targetPath = req.originalUrl.replace("/proxy/posthog", "");
+    const response = await fetch(`https://us.i.posthog.com${targetPath}`, {
+      method: req.method,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": req.headers["content-type"] || "application/json",
         Host: "us.i.posthog.com",
       },
-      body: JSON.stringify(req.body),
+      body: ["GET", "HEAD"].includes(req.method)
+        ? undefined
+        : JSON.stringify(req.body),
     });
 
     const text = await response.text();
