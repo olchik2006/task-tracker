@@ -22,21 +22,21 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend
+        working-directory: ./frontend
         run: npm ci
 
       - name: Run linter
-        working-directory: frontend
+        working-directory: ./frontend
         run: npm run lint
 
       - name: Run unit tests
-        working-directory: frontend
+        working-directory: ./frontend
         run: npm run test
 
       - name: Install Playwright browsers
-        working-directory: frontend
+        working-directory: ./frontend
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests
-        working-directory: frontend
+        working-directory: ./frontend
         run: npm run test:e2e
