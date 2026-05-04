@@ -1,4 +1,4 @@
-export function FilterBar(currentFilter, showUrgentFilter = false) {
+export function FilterBar(currentFilter, showUrgentFilter) {
   return `
     <div class="filters">
       <button class="filter-btn ${currentFilter === "all" ? "active" : ""}" data-filter="all">All</button>
@@ -6,7 +6,7 @@ export function FilterBar(currentFilter, showUrgentFilter = false) {
       <button class="filter-btn ${currentFilter === "done" ? "active" : ""}" data-filter="done">Done</button>
       ${
         showUrgentFilter
-          ? `<button class="filter-btn ${currentFilter === "urgent" ? "active" : ""}" data-filter="urgent" id="urgent-btn">Only Urgent</button>`
+          ? `<button class="filter-btn ${currentFilter === "urgent" ? "active" : ""}" data-filter="urgent">Only Urgent</button>`
           : ""
       }
     </div>

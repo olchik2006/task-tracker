@@ -8,6 +8,7 @@ import posthog from "posthog-js";
 let currentFilter = "all";
 let tasks = [];
 let showUrgentFilter = false;
+let flagRefreshTimer = null;
 
 function getFilteredTasks() {
   if (currentFilter === "active") {
@@ -19,7 +20,7 @@ function getFilteredTasks() {
   }
 
   if (currentFilter === "urgent") {
-    return tasks.filter((task) => task.title?.toLowerCase().includes("urgent"));
+    return tasks.filter((task) => task.urgent);
   }
 
   return tasks;
@@ -34,6 +35,29 @@ async function loadTasks() {
   }
 }
 
+function syncFeatureFlags() {
+  const nextValue = !!posthog.isFeatureEnabled("show-urgent-filter");
+  const changed = nextValue !== showUrgentFilter;
+  showUrgentFilter = nextValue;
+  return changed;
+}
+
+function startFlagPolling() {
+  if (flagRefreshTimer) clearInterval(flagRefreshTimer);
+
+  flagRefreshTimer = setInterval(async () => {
+    try {
+      await posthog.reloadFeatureFlags();
+      const changed = syncFeatureFlags();
+      if (changed) {
+        await renderApp();
+      }
+    } catch (error) {
+      console.error("Failed to reload feature flags:", error);
+    }
+  }, 15000);
+}
+
 export async function renderApp() {
   const app = document.getElementById("app");
 
@@ -41,17 +65,21 @@ export async function renderApp() {
     <main>
       <div class="container">
         <div class="header">
+          <span class="badge">Task Manager</span>
+          <span class="env-badge">Mode: ${import.meta.env.VITE_APP_STATUS || "Development"}</span>
           <h1>Task Tracker</h1>
-          <p class="subtitle">Loading...</p>
+          <p class="subtitle">Організовуй свої задачі швидко, просто і красиво</p>
         </div>
+        <div class="loading-state">Loading...</div>
       </div>
     </main>
   `;
 
   try {
     await loadTasks();
-
-    showUrgentFilter = !!posthog.isFeatureEnabled("show-urgent-filter");
+    await posthog.reloadFeatureFlags();
+    syncFeatureFlags();
+    startFlagPolling();
 
     app.innerHTML = `
       <main>
@@ -64,7 +92,7 @@ export async function renderApp() {
           </div>
 
           ${TaskStats(tasks)}
-          ${TaskForm()}
+          ${TaskForm(showUrgentFilter)}
           ${FilterBar(currentFilter, showUrgentFilter)}
           ${TaskList(getFilteredTasks())}
         </div>
@@ -73,6 +101,7 @@ export async function renderApp() {
 
     const form = document.getElementById("task-form");
     const input = document.getElementById("task-input");
+    const urgentInput = document.getElementById("task-urgent");
 
     if (form && input) {
       form.addEventListener("submit", async (e) => {
@@ -81,13 +110,16 @@ export async function renderApp() {
         const title = input.value.trim();
         if (!title) return;
 
-        await createTask(title);
+        const urgent = urgentInput ? urgentInput.checked : false;
+
+        await createTask(title, urgent);
 
         posthog.capture("task_created", {
           title_length: title.length,
           is_authenticated: false,
           category: "general",
-          priority: title.toLowerCase().includes("urgent") ? "high" : "normal",
+          priority: urgent ? "high" : "normal",
+          urgent,
         });
 
         await renderApp();
