@@ -37,8 +37,20 @@ async function loadTasks() {
 export async function renderApp() {
   const app = document.getElementById("app");
 
+  app.innerHTML = `
+    <main>
+      <div class="container">
+        <div class="header">
+          <h1>Task Tracker</h1>
+          <p class="subtitle">Loading...</p>
+        </div>
+      </div>
+    </main>
+  `;
+
   try {
     await loadTasks();
+    showUrgentFilter = !!posthog.isFeatureEnabled("show-urgent-filter");
 
     app.innerHTML = `
       <main>
