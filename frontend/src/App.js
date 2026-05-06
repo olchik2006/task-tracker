@@ -86,7 +86,11 @@ function ProductivityTip() {
 function throwSentryTestError() {
   addBreadcrumb("ui.click", "User clicked Sentry test button");
 
-  throw new Error("Sentry Test Error: Task Tracker lab 6");
+  Sentry.withScope((scope) => {
+    scope.setFingerprint([`alert-demo-${Date.now()}`]);
+    const error = new Error("Sentry Test Error Alert Demo");
+    Sentry.captureException(error);
+  });
 }
 
 export async function renderApp() {
