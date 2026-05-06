@@ -1,4 +1,5 @@
 import "./styles/main.css";
+import * as Sentry from "@sentry/browser";
 import { renderApp } from "./App.js";
 import posthog from "posthog-js";
 
@@ -13,5 +14,23 @@ if (key && host) {
     autocapture: true,
   });
 }
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1.0,
+  environment: import.meta.env.MODE,
+});
+
+Sentry.setUser({
+  id: "guest-task-tracker",
+  email: "guest@tasktracker.local",
+  segment: "lab6-demo",
+});
 
 renderApp();
