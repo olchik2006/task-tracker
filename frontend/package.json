@@ -12,6 +12,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@sentry/browser": "^10.51.0",
     "@vitejs/plugin-react": "^4.3.4",
     "posthog-js": "^1.372.6"
   },

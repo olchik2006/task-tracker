@@ -304,3 +304,18 @@ h1 {
   font-size: 14px;
   color: #cbd5e1;
 }
+.sentry-test-btn {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sentry-test-btn:hover {
+  background: #dc2626;
+}
