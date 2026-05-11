@@ -91,6 +91,27 @@ function throwSentryTestError() {
     const error = new Error("Sentry Test Error Alert Demo");
     Sentry.captureException(error);
   });
+
+  const app = document.getElementById("app");
+  const existing = document.getElementById("sentry-demo-error");
+
+  if (!existing) {
+    app.insertAdjacentHTML(
+      "afterbegin",
+      `
+        <div id="sentry-demo-error" style="
+          margin: 16px;
+          padding: 12px 16px;
+          border-radius: 8px;
+          background: #ffe5e5;
+          color: #a40000;
+          font-weight: 600;
+        ">
+          Test error was triggered and sent to Sentry.
+        </div>
+      `,
+    );
+  }
 }
 
 export async function renderApp() {
