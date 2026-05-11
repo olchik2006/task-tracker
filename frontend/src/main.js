@@ -24,7 +24,7 @@ Sentry.init({
   tracesSampleRate: 1.0,
   replaysSessionSampleRate: 1.0,
   replaysOnErrorSampleRate: 1.0,
-  environment: import.meta.env.MODE,
+  environment: import.meta.env.VITE_SENTRY_ENV || import.meta.env.MODE,
 });
 
 Sentry.setUser({
